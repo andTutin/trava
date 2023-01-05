@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo
+    container_name: mongo-db
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./db:/data/db
+
+  frontend:
+    container_name: trava-frontend
+    build: frontend
+    ports:
+      - 80:5173
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/frontend
+    restart: on-failure
+    
+  backend:
+    container_name: trava-backend
+    build: backend
+    ports:
+     - 3000:3000
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/backend
+    restart: on-failure
