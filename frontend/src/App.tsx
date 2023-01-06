@@ -1,9 +1,40 @@
-import { useState } from 'react'
+import { ErrorInfo, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [header, setHeader] = useState<string | null>(null)
+
+  const getHeader = async () => {
+    try {
+      const res = await fetch('http://localhost:3000')
+      const text = await res.text()
+
+      setHeader(text)
+    } catch (error) {
+      setHeader('Что-то пошло не так!')
+    }
+  }
+
+  const postUser = async () => {
+    const user = {
+      name: 'anonymous',
+      password: '' + Date.now()
+    }
+
+    try {
+      const res = await fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(user)
+      });
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div className="App">
@@ -15,10 +46,18 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>{header}</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={() => getHeader()}>
+          get header
+        </button>
+        <p>
+          Edit <code>src/App.tsx</code> and save to test HMR
+        </p>
+      </div>
+      <div className="card">
+        <button onClick={() => postUser()}>
+          post User
         </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
