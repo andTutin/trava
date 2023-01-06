@@ -16,6 +16,26 @@ function App() {
     }
   }
 
+  const postUser = async () => {
+    const user = {
+      name: 'anonymous',
+      password: '' + Date.now()
+    }
+
+    try {
+      const res = await fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(user)
+      });
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div className="App">
       <div>
@@ -30,6 +50,14 @@ function App() {
       <div className="card">
         <button onClick={() => getHeader()}>
           get header
+        </button>
+        <p>
+          Edit <code>src/App.tsx</code> and save to test HMR
+        </p>
+      </div>
+      <div className="card">
+        <button onClick={() => postUser()}>
+          post User
         </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR

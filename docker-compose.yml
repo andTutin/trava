@@ -20,12 +20,12 @@ services:
     volumes:
       - ./frontend:/frontend
     restart: on-failure
-    
+
   backend:
     container_name: trava-backend
     build: backend
     ports:
-     - 3000:3000
+      - 3000:3000
     depends_on:
       - db
     volumes:
