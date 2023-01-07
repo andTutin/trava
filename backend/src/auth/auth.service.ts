@@ -1,28 +1,26 @@
-import { Model } from 'mongoose';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Auth, AuthDocument } from '../schemas/auth.schema';
 import { SignupDto } from './dto/signup.dto';
 import { SigninDto } from './dto/signin.dto';
+import { UserService } from '../user/user.service'
 
 @Injectable()
 export class AuthService {
-  constructor(@InjectModel(Auth.name) private authModel: Model<AuthDocument>) { }
+  constructor(private readonly userService: UserService) { }
 
   async signup(signupDto: SignupDto) {
-    const isUserWithEmailAlreadyExists = await this.authModel.findOne({ email: signupDto.email })
+    const isUserWithEmailAlreadyExists = await this.userService.findByEmail(signupDto.email)
 
     if (isUserWithEmailAlreadyExists) {
       throw new HttpException('Указанный вами email уже занят ...', HttpStatus.CONFLICT)
     }
 
-    const createdUser = new this.authModel(signupDto);
+    const createdUser = await this.userService.create(signupDto);
 
-    return createdUser.save();
+    return createdUser
   }
 
-  async signin(signinDto: SignupDto) {
-    const candidate = await this.authModel.findOne({ email: signinDto.email })
+  async signin(signinDto: SigninDto) {
+    const candidate = await this.userService.findByEmail(signinDto.email)
 
     if (!candidate) {
       throw new HttpException('Пользователь с таким email не зарегистрирован ...', HttpStatus.NOT_FOUND)
