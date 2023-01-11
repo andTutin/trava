@@ -2,6 +2,6 @@
 ```sh
 $ git clone git@github.com:andTutin/trava
 $ cd trava
-$ mkdir db
+$ npm run prepare
 $ npm run dev:compose:up
 ```
