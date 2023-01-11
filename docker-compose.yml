@@ -8,7 +8,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - ./db:/data/db
+      - trava-vol:/data/db
 
   frontend:
     container_name: prod_trava-frontend
@@ -16,7 +16,7 @@ services:
       context: ./frontend
       target: prod
     ports:
-      - 80:4173
+      - 80:5173
     restart: on-failure
 
   backend:
@@ -29,3 +29,6 @@ services:
     depends_on:
       - db
     restart: on-failure
+
+volumes:
+  trava-vol:
