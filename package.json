@@ -6,7 +6,7 @@
   "scripts": {
     "install-fe-deps": "cd frontend && npm i",
     "install-be-deps": "cd backend && npm i",
-    "prepare": "npm run install-fe-deps && npm run install-be-deps",
+    "prepare": "npm run install-fe-deps && npm run install-be-deps && echo 'JWT_SECRET=' > .dev.env",
     "dev:compose:up": "docker-compose -f docker-compose.dev.yml up --build -d",
     "dev:compose:down": "docker-compose -f docker-compose.dev.yml down",
     "compose:up": "docker-compose up --build -d",

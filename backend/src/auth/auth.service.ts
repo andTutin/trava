@@ -1,11 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { SignupDto } from './dto/signup.dto';
-import { SigninDto } from './dto/signin.dto';
-import { UserService } from '../user/user.service'
+import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
+
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService) { }
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService
+    ) { }
 
   async signup(signupDto: SignupDto) {
     const isUserWithEmailAlreadyExists = await this.userService.findByEmail(signupDto.email)
@@ -19,17 +23,24 @@ export class AuthService {
     return createdUser
   }
 
-  async signin(signinDto: SigninDto) {
-    const candidate = await this.userService.findByEmail(signinDto.email)
+  async validateUser(email: string, password: string): Promise<any> {
+    const candidate = await this.userService.findByEmail(email)
 
-    if (!candidate) {
-      throw new HttpException('Пользователь с таким email не зарегистрирован ...', HttpStatus.NOT_FOUND)
+    if (candidate && candidate.password === password) {
+      const { id, email} = candidate
+
+      return { id, email }
     }
 
-    if (candidate.password !== signinDto.password) {
-      throw new HttpException('Ошибка авторизации: неверный email и/или пароль ...', HttpStatus.FORBIDDEN)
-    }
-
-    return candidate
+    return null
   }
+
+  async login(user: {id: string, email: string}) {
+    const payload = {email: user.email, id: user.id}
+
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+  
 }

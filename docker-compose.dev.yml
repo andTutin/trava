@@ -26,6 +26,8 @@ services:
     build:
       context: ./backend
       target: dev
+    env_file:
+      - .dev.env
     ports:
       - 3000:3000
     depends_on:
