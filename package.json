@@ -4,8 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:compose:up": "docker-compose up",
-    "dev:compose:down": "docker-compose down"
+    "install-fe-deps": "cd frontend && npm i",
+    "install-be-deps": "cd backend && npm i",
+    "prepare": "npm run install-fe-deps && npm run install-be-deps",
+    "dev:compose:up": "docker-compose -f docker-compose.dev.yml up --build -d",
+    "dev:compose:down": "docker-compose -f docker-compose.dev.yml down",
+    "compose:up": "docker-compose up --build -d",
+    "compose:down": "docker-compose down",
+    "clean": "docker rmi trava-frontend trava-backend && docker volume rm trava_trava-vol"
   },
   "keywords": [],
   "author": "",

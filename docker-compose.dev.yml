@@ -11,23 +11,27 @@ services:
       - trava-vol:/data/db
 
   frontend:
-    container_name: prod_trava-frontend
+    container_name: dev_trava-frontend
     build: 
       context: ./frontend
-      target: prod
+      target: dev
     ports:
       - 80:5173
+    volumes:
+      - ./frontend/:/frontend
     restart: on-failure
 
   backend:
-    container_name: prod_trava-backend
+    container_name: dev_trava-backend
     build:
       context: ./backend
-      target: prod
+      target: dev
     ports:
       - 3000:3000
     depends_on:
       - db
+    volumes:
+      - ./backend:/backend
     restart: on-failure
 
 volumes:
