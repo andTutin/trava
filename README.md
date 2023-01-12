@@ -8,7 +8,7 @@ $ git clone git@github.com:andTutin/trava
 ```sh
 $ cd trava
 ```
-Следующая команда установит зависимости для frontend и  backend сервисов, создаст файл .dev.env, в который необходимо добавить jwt secret
+Следующая команда установит зависимости для frontend и  backend сервисов, создаст файл .dev.env, в который нужно вписать JWT_SECRET (обязательно) и SALT_OR_ROUNDS для bcrypt (число)
 ```sh
 $ npm run prepare
 ```

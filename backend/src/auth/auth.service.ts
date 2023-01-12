@@ -2,7 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { SignupDto } from './dto/signup.dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
+const saltOrRounds: number = Number(process.env.SALT_OR_ROUNDS)
 
 @Injectable()
 export class AuthService {
@@ -18,15 +20,18 @@ export class AuthService {
       throw new HttpException('Указанный вами email уже занят ...', HttpStatus.CONFLICT)
     }
 
-    const createdUser = await this.userService.create(signupDto);
+    const hashedPassword = await bcrypt.hash(signupDto.password, saltOrRounds);
+
+    const createdUser = await this.userService.create({ email: signupDto.email, password: hashedPassword});
 
     return createdUser
   }
 
   async validateUser(email: string, password: string): Promise<any> {
     const candidate = await this.userService.findByEmail(email)
+    const isMatch = await bcrypt.compare(password, candidate.password);
 
-    if (candidate && candidate.password === password) {
+    if (candidate && isMatch) {
       const { id, email} = candidate
 
       return { id, email }
