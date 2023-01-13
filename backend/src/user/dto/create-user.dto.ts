@@ -1,9 +1,4 @@
-import { IsEmail, MinLength } from 'class-validator';
+import { PickType } from '@nestjs/mapped-types';
+import { User } from '../entities/user.entity';
 
-export class CreateUserDto {
-    @IsEmail()
-    email: string
-
-    @MinLength(8, {message: 'Пароль слишком короткий. Минимум $constraint1 символов'})
-    password: string
-}
+export class CreateUserDto extends PickType(User, ['email', 'password']) {}

@@ -6,6 +6,10 @@ import * as bcrypt from 'bcrypt';
 
 const saltOrRounds: number = Number(process.env.SALT_OR_ROUNDS)
 
+export type AccessTokenType = {
+  access_token: string
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -13,9 +17,8 @@ export class AuthService {
     private jwtService: JwtService
     ) { }
 
-  async signup(signupDto: SignupDto) {
+  async signup(signupDto: SignupDto): Promise<AccessTokenType> {
     const {email, password} = signupDto
-
     const isUserWithEmailAlreadyExists = await this.userService.findByEmail(email)
 
     if (isUserWithEmailAlreadyExists) {
@@ -23,30 +26,26 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(password, saltOrRounds);
+    const { id } = await this.userService.create({ ...signupDto, password: hashedPassword});
 
-    const createdUser = await this.userService.create({ ...signupDto, password: hashedPassword});
-
-    return this.login({ id: createdUser['_id'], email })
+    return this.login(id)
   }
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string): Promise<string | null> {
     const candidate = await this.userService.findByEmail(email)
-    const hashedPassword = candidate?.password || ''
-    const isMatch = await bcrypt.compare(password, hashedPassword);
 
-    if (candidate && isMatch) {
-      const { id, email} = candidate
+    if (candidate && await bcrypt.compare(password, candidate.hashedPassword)) {
+      const { id } = candidate
 
-      return { id, email }
+      return id
     }
 
     return null
   }
 
-  async login(user: {id: string, email: string}) {
+  async login(id: string): Promise<AccessTokenType> {
     return {
-      access_token: this.jwtService.sign(user),
+      access_token: this.jwtService.sign({id}),
     };
   }
-  
 }
