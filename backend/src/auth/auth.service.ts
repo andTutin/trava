@@ -14,22 +14,25 @@ export class AuthService {
     ) { }
 
   async signup(signupDto: SignupDto) {
-    const isUserWithEmailAlreadyExists = await this.userService.findByEmail(signupDto.email)
+    const {email, password} = signupDto
+
+    const isUserWithEmailAlreadyExists = await this.userService.findByEmail(email)
 
     if (isUserWithEmailAlreadyExists) {
       throw new HttpException('Указанный вами email уже занят ...', HttpStatus.CONFLICT)
     }
 
-    const hashedPassword = await bcrypt.hash(signupDto.password, saltOrRounds);
+    const hashedPassword = await bcrypt.hash(password, saltOrRounds);
 
-    const createdUser = await this.userService.create({ email: signupDto.email, password: hashedPassword});
+    const createdUser = await this.userService.create({ ...signupDto, password: hashedPassword});
 
-    return createdUser
+    return this.login({ id: createdUser['_id'], email })
   }
 
   async validateUser(email: string, password: string): Promise<any> {
     const candidate = await this.userService.findByEmail(email)
-    const isMatch = await bcrypt.compare(password, candidate.password);
+    const hashedPassword = candidate?.password || ''
+    const isMatch = await bcrypt.compare(password, hashedPassword);
 
     if (candidate && isMatch) {
       const { id, email} = candidate
@@ -41,10 +44,8 @@ export class AuthService {
   }
 
   async login(user: {id: string, email: string}) {
-    const payload = {email: user.email, id: user.id}
-
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(user),
     };
   }
   
