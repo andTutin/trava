@@ -25,7 +25,7 @@ export class UserController {
   async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Request() req) {
     const id = req.user
 
-    return this.fileServise.createFile(file, id)
+    return this.fileServise.uploadAvatar(file, id)
 
   }
 

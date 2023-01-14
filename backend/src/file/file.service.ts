@@ -8,7 +8,7 @@ import { UserService } from '../user/user.service'
 export class FileService {
     constructor(private userService: UserService) { }
 
-    async createFile(file: Express.Multer.File, id: string): Promise<string> {
+    async uploadAvatar(file: Express.Multer.File, id: string): Promise<string> {
         try {
             const fileName = `${id}.jpg`
             const filePath = path.resolve(__dirname, '..' ,'..', 'static')
