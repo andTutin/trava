@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, IsUrl, MinLength } from 'class-validator';
 
 export class User {
     @IsEmail()
@@ -15,4 +15,7 @@ export class User {
 
     @IsString()
     lastname: string
+
+    @IsString()
+    avatar: string
 }
