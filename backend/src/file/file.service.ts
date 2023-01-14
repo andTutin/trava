@@ -8,9 +8,9 @@ import { UserService } from '../user/user.service'
 export class FileService {
     constructor(private userService: UserService) { }
 
-    async createFile(file): Promise<string> {
+    async createFile(file: Express.Multer.File, id: string): Promise<string> {
         try {
-            const fileName = uuid.v4() + '.jpg';
+            const fileName = `${id}.jpg`
             const filePath = path.resolve(__dirname, '..' ,'..', 'static')
 
             if (!fs.existsSync(filePath)) {
@@ -19,7 +19,7 @@ export class FileService {
 
             fs.writeFileSync(path.join(filePath, fileName), file.buffer)
 
-            const { avatar } = await this.userService.updateUser({ id: '63c1e8ad9678a6c57134cec9', avatar: fileName })
+            const { avatar } = await this.userService.updateUser({ id , avatar: fileName })
 
             return avatar
 
