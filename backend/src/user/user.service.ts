@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -29,7 +29,7 @@ export class UserService {
   }
 
   async findById(id: string): Promise<Partial<User> | null> {
-    const found = await this.userModel.findById(id)
+    const found = await this.userModel.findById(id).populate('activities')
 
     if (found) {
       const { password, __v, ...rest } = found["_doc"]
@@ -51,5 +51,13 @@ export class UserService {
     }
 
     return null
+  }
+
+  async addActivity(id: string, activity: any) {
+    const found = await this.userModel.findById(id)
+
+    console.log(found)
+
+    await this.updateUser({id, activities: [...found.activities, activity]} as UpdateUserDto)
   }
 }

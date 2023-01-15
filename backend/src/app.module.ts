@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { join } from 'path';
     }),
     MongooseModule.forRoot('mongodb://db:27017/trava'),
     AuthModule,
-    UserModule
+    UserModule,
+    ActivityModule
   ],
   controllers: [AppController],
   providers: [AppService],
