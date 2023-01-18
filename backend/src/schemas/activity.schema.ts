@@ -20,6 +20,15 @@ export class Activity {
 
   @Prop({default: 'Круто покатались!'})
   description: string
+
+  @Prop({required: true, type: Object})
+  stats: {
+    distance: number
+    elevationGain: number
+    startedAt: Date
+    finishedAt: Date
+    duration: string  
+  }
 }
 
 export const ActivitySchema = SchemaFactory.createForClass(Activity);
