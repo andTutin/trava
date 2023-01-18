@@ -7,6 +7,9 @@ import { UserModule } from './user/user.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ActivityModule } from './activity/activity.module';
+import { AvatarModule } from './avatar/avatar.module';
+import { FileModule } from './file/file.module';
+import { GpxModule } from './gpx/gpx.module';
 
 @Module({
   imports: [
@@ -16,7 +19,10 @@ import { ActivityModule } from './activity/activity.module';
     MongooseModule.forRoot('mongodb://db:27017/trava'),
     AuthModule,
     UserModule,
-    ActivityModule
+    ActivityModule,
+    AvatarModule,
+    FileModule,
+    GpxModule
   ],
   controllers: [AppController],
   providers: [AppService],

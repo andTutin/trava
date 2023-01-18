@@ -1,63 +1,71 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Activity } from 'src/schemas/activity.schema';
+import { FileService } from 'src/file/file.service';
+import * as bcrypt from 'bcrypt';
+
+const saltOrRounds: number = Number(process.env.SALT_OR_ROUNDS)
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const createdUser = new this.userModel(createUserDto);
-    const  {id, email}=  await createdUser.save();
+    const {email, password} = createUserDto
+    const isUserWithEmailAlreadyExists = await this.findByEmail(email)
 
-    return {id, email}
-  }
-
-  async findByEmail(email: string): Promise<{id: string, hashedPassword: string} | null> {
-     const found =  await this.userModel.findOne({ email })
-
-     if (found) {
-      const { _id: id, password: hashedPassword } = found["_doc"]
-
-      return { id, hashedPassword }
-    } 
-
-    return null
-  }
-
-  async findById(id: string): Promise<Partial<User> | null> {
-    const found = await this.userModel.findById(id).populate('activities')
-
-    if (found) {
-      const { password, __v, ...rest } = found["_doc"]
-
-      return rest
+    if (isUserWithEmailAlreadyExists) {
+      throw new HttpException('Указанный вами email уже занят ...', HttpStatus.CONFLICT)
     }
 
-    return null
+    const hashedPassword = await bcrypt.hash(password, saltOrRounds);
+
+    const newUser = new this.userModel({...createUserDto, password: hashedPassword});
+    await newUser.save();
+
+    return {
+      userId: newUser.id,
+      email: newUser.email
+    }
   }
 
-  async updateUser(updateUserDto: UpdateUserDto): Promise<Partial<User> | null>  {
-    const {id, ...updates} = updateUserDto
-    const updated =  await this.userModel.findByIdAndUpdate(updateUserDto.id, updates, {returnDocument: 'after'})
+  async findAll() {
+    return await this.userModel.find().populate('activities')
+  }
 
-    if (updated) {
-      const { password, __v, ...updatedUser } = updated["_doc"]
+  async findById(id: string) {
+    return await this.userModel.findById(id).populate('activities').select('-owner')
+  }
 
-      return updatedUser
+  async findByEmail(email: string) {
+    return await this.userModel.findOne({ email }).select('id email password')
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.hasOwnProperty('activity')) {
+      const user = await this.userModel.findById(id)
+
+      user.activities.push(updateUserDto.activity)
+
+      await user.save()
+
+      return user
     }
 
+    const updatedUser =  await this.userModel.findByIdAndUpdate(id, updateUserDto, {returnDocument: 'after'})
+
+    if (updatedUser) return updatedUser
+
     return null
   }
 
-  async addActivity(id: string, activity: any) {
-    const found = await this.userModel.findById(id)
-
-    console.log(found)
-
-    await this.updateUser({id, activities: [...found.activities, activity]} as UpdateUserDto)
+  async remove(id: string) {
+    return await this.userModel.findByIdAndRemove(id);
   }
 }

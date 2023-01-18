@@ -1,10 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { SignupDto } from './dto/signup.dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-
-const saltOrRounds: number = Number(process.env.SALT_OR_ROUNDS)
 
 export type AccessTokenType = {
   access_token: string
@@ -17,35 +15,30 @@ export class AuthService {
     private jwtService: JwtService
     ) { }
 
-  async signup(signupDto: SignupDto): Promise<AccessTokenType> {
-    const {email, password} = signupDto
-    const isUserWithEmailAlreadyExists = await this.userService.findByEmail(email)
+  async signup(signupDto: SignupDto): Promise<AccessTokenType>{
+    const user = await this.userService.create(signupDto)
 
-    if (isUserWithEmailAlreadyExists) {
-      throw new HttpException('Указанный вами email уже занят ...', HttpStatus.CONFLICT)
-    }
-
-    const hashedPassword = await bcrypt.hash(password, saltOrRounds);
-    const { id } = await this.userService.create({ ...signupDto, password: hashedPassword});
-
-    return this.login(id)
+    return this.login(user)
   }
 
-  async validateUser(email: string, password: string): Promise<string | null> {
+  async validateUser(email: string, password: string) {
     const candidate = await this.userService.findByEmail(email)
 
-    if (candidate && await bcrypt.compare(password, candidate.hashedPassword)) {
-      const { id } = candidate
-
-      return id
+    if (candidate && await bcrypt.compare(password, candidate.password)) {
+      return {
+        userId: candidate.id,
+        email: candidate.email
+      }
     }
 
     return null
   }
 
-  async login(id: string): Promise<AccessTokenType> {
+  async login(user: any): Promise<AccessTokenType> {
+    const payload = { email: user.email, sub: user.userId };
+
     return {
-      access_token: this.jwtService.sign({id}),
+      access_token: this.jwtService.sign(payload),
     };
   }
 }

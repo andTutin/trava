@@ -6,13 +6,19 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Activity, ActivitySchema } from 'src/schemas/activity.schema';
 import { UserService } from 'src/user/user.service';
 import { User, UserSchema } from 'src/schemas/user.schema';
+import { UserModule } from 'src/user/user.module';
+import { FileService } from 'src/file/file.service';
 
 @Module({
   imports: [
+    forwardRef(() => UserModule),
     forwardRef(() => FileModule),
-    MongooseModule.forFeature([{name: Activity.name, schema: ActivitySchema}, {name: User.name, schema: UserSchema}])]
-  ,
+    MongooseModule.forFeature([
+      {name: Activity.name, schema: ActivitySchema}, 
+      {name: User.name, schema: UserSchema}
+    ])
+  ],
   controllers: [ActivityController],
-  providers: [ActivityService, UserService]
+  providers: [ActivityService, UserService, FileService]
 })
 export class ActivityModule {}

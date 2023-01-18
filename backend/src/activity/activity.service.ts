@@ -1,35 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model, Mongoose, Types } from 'mongoose';
 import { Activity, ActivityDocument } from 'src/schemas/activity.schema';
 import { UserService } from 'src/user/user.service';
-import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Injectable()
 export class ActivityService {
   constructor(@InjectModel(Activity.name) private activityModel: Model<ActivityDocument>, private userService: UserService) {}
   
-  async create(createActivityDto: CreateActivityDto) {
-    const createdActivity = new this.activityModel(createActivityDto);
+  async create(id: string, file: string) {
+    const createdActivity = new this.activityModel({file, owner: id});
 
     await createdActivity.save()
-    await this.userService.addActivity(createdActivity.owner['id'], createdActivity) 
+    await this.userService.update(id, {activity: createdActivity.id})
+
+    return createdActivity
   }
 
-  findAll() {
-    return `This action returns all activity`;
+  async findAll() {
+    return await this.activityModel.find().populate('owner');
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} activity`;
+  async findById(id: string) {
+    return await this.activityModel.findById(id).populate('owner');
   }
 
-  update(id: number, updateActivityDto: UpdateActivityDto) {
-    return `This action updates a #${id} activity`;
+  async update(id: string, updateActivityDto: UpdateActivityDto) {
+    return await this.activityModel.findByIdAndUpdate(id, updateActivityDto, {returnDocument: 'after'});
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} activity`;
+  async remove(id: string) {
+    return await this.activityModel.findByIdAndDelete(id);
   }
 }

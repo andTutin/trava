@@ -12,8 +12,11 @@ import { Activity, ActivitySchema } from 'src/schemas/activity.schema';
   imports: [
     forwardRef(() => ActivityModule),
     forwardRef(() => UserModule),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, {name: Activity.name, schema: ActivitySchema}]),
-    ],
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      {name: Activity.name, schema: ActivitySchema}
+    ]),
+  ],
   providers: [FileService, UserService, ActivityService],
   exports: [FileService]
 })

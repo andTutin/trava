@@ -1,10 +1,8 @@
-import { IsString } from "class-validator";
-import mongoose from "mongoose";
+import { IsMongoId, IsString } from "class-validator";
 
 export class CreateActivityDto {
     @IsString()
-    owner: mongoose.Types.ObjectId
-
-    @IsString()
     file: string
+
+    owner: string
 }

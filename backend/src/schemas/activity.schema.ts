@@ -6,7 +6,7 @@ export type ActivityDocument = HydratedDocument<Activity>;
 
 @Schema()
 export class Activity {
-  @Prop({ required:true, type: mongoose.Schema.Types.ObjectId, ref: 'User'})
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User'})
   owner: User
 
   @Prop({ required: true })
